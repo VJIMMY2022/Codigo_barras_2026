@@ -14,12 +14,16 @@
         <!-- Header -->
         <header class="glass-panel">
             <div class="header-left">
-                <h1>Control de Envíos</h1>
-                <small id="filenameDisplay" class="text-secondary"></small>
+                <img src="/static/logo.png" alt="Logo" class="app-logo">
+                <div>
+                    <h1>Control de Envíos</h1>
+                    <div class="designer-credit">Diseñado por Intelliearth - Jimmy Valderrama</div>
+                </div>
             </div>
             <div class="user-control">
                 <span>Operador:</span>
-                <input type="text" id="userInput" placeholder="Nombre Usuario" value="Operador 1">
+                <!-- <input type="text" id="userInput" placeholder="Nombre Usuario" value="Operador 1"> -->
+                <input type="text" id="userInputDisplay" placeholder="Nombre Usuario" value="Operador 1">
             </div>
         </header>
 
@@ -60,6 +64,10 @@
                 <div class="input-group">
                     <label>Fila Inicio de Datos (Excel)</label>
                     <input type="number" id="dataRowInput" value="19" class="premium-input">
+                </div>
+                <div class="input-group">
+                    <label>Número de Envío</label>
+                    <input type="text" id="shipmentInput" placeholder="Ej: ENV-001" class="premium-input">
                 </div>
                 <div class="input-group align-end">
                     <button id="loadColumnsBtn" class="secondary-btn">Cargar Columnas</button>

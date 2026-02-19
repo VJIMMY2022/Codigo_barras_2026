@@ -252,6 +252,36 @@ header h1 {
     margin-bottom: 20px;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.app-logo {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+}
+
+.designer-credit {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    margin-top: -2px;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(to right, #fff, #a5f3fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+}
+
 .input-group {
     display: flex;
     flex-direction: column;
@@ -324,6 +354,42 @@ header h1 {
     background: rgba(59, 130, 246, 0.2);
     color: var(--accent-color);
     border: 1px solid var(--accent-color);
+}
+
+/* Next Sample Guidance */
+.next-sample-box {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    margin: 20px 0;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+}
+
+.next-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--accent-color);
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.next-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin: 5px 0;
+}
+
+.next-type {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
 }
 
 /* Modal */

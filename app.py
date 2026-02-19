@@ -158,6 +158,9 @@ async def configure_app(req: ConfigurationRequest):
         if "QAQC_Type" not in df.columns:
             df["QAQC_Type"] = None 
             
+        # Add Shipment Number
+        df["N° Envío"] = req.shipment_number
+            
         data_store["df"] = df
         data_store["config"] = req.dict()
         
@@ -166,9 +169,20 @@ async def configure_app(req: ConfigurationRequest):
         data_store["stats"]["scanned"] = int(df["Scanned"].sum())
         data_store["stats"]["missing"] = data_store["stats"]["total"] - data_store["stats"]["scanned"]
         
+        # Determine Next Sample
+        next_sample = None
+        unscanned = df[~df["Scanned"]]
+        if not unscanned.empty:
+            first_unscanned = unscanned.iloc[0]
+            next_sample = {
+                "id": str(first_unscanned["N° Muestra"]),
+                "qaqc": str(first_unscanned["QAQC_Type"]) if pd.notna(first_unscanned["QAQC_Type"]) else "Muestra Normal"
+            }
+        
         return {
             "status": "success",
-            "total": len(df)
+            "total": len(df),
+            "next_sample": next_sample
         }
         
     except Exception as e:
@@ -186,8 +200,23 @@ async def scan_sample(scan_req: ScanRequest):
     
     match = df[df["N° Muestra"] == barcode]
     
+    # helper for next sample
+    def get_next_sample(dataframe):
+        unscanned = dataframe[~dataframe["Scanned"]]
+        if not unscanned.empty:
+            first = unscanned.iloc[0]
+            return {
+                "id": str(first["N° Muestra"]),
+                "qaqc": str(first["QAQC_Type"]) if pd.notna(first["QAQC_Type"]) else "Muestra Normal"
+            }
+        return None
+
     if match.empty:
-        return JSONResponse(content={"status": "not_found", "barcode": barcode}, status_code=404)
+        return JSONResponse(content={
+            "status": "not_found", 
+            "barcode": barcode,
+            "next_sample": get_next_sample(df)
+        }, status_code=404)
     
     idx = match.index[0]
     
@@ -203,7 +232,8 @@ async def scan_sample(scan_req: ScanRequest):
             "barcode": barcode, 
             "timestamp": df.at[idx, "Scan Timestamp"],
             "scanned_by": df.at[idx, "Scan User"],
-            "qaqc_type": qaqc_display
+            "qaqc_type": qaqc_display,
+            "next_sample": get_next_sample(df)
         })
     
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -226,7 +256,8 @@ async def scan_sample(scan_req: ScanRequest):
         "status": "success", 
         "data": clean_data, 
         "stats": data_store["stats"],
-        "qaqc_type": qaqc_display
+        "qaqc_type": qaqc_display,
+        "next_sample": get_next_sample(df)
     }
 
 @app.get("/get_data")

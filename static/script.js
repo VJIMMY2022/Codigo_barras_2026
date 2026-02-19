@@ -100,11 +100,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Confirm Configuration
     confirmConfigBtn.addEventListener('click', async () => {
+        const shipmentVal = document.getElementById('shipmentInput').value;
+        if (!shipmentVal.trim()) {
+            alert("Ingrese un Número de Envío");
+            return;
+        }
+
         const config = {
             header_row: parseInt(headerRowInput.value),
             data_start_row: parseInt(dataRowInput.value),
             sample_col: sampleColSelect.value,
-            qaqc_col: qaqcColSelect.value || null
+            qaqc_col: qaqcColSelect.value || null,
+            shipment_number: shipmentVal
         };
 
         if (!config.sample_col) {
@@ -132,7 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 totalCountEl.textContent = result.total;
                 missingCountEl.textContent = result.total;
 
-                showFeedback('Sistema configurado. ¡A escanear!', 'success');
+                // Init Next Sample
+                updateNextSample(result.next_sample);
+
+                showFeedback('Configurado. Envío: ' + shipmentVal, 'success');
                 barcodeInput.focus();
             } else {
                 alert('Error: ' + result.detail);
@@ -169,15 +179,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 showFeedback(`${barcode} OK`, 'success');
                 addToList(result.data, 'success', result.qaqc_type);
                 updateStats(result.stats);
+                updateNextSample(result.next_sample);
             } else if (result.status === 'duplicate') {
                 showFeedback(`DUPLICADO: ${barcode}`, 'duplicate');
                 addToList({ 'N° Muestra': barcode }, 'duplicate', result.qaqc_type);
+                updateNextSample(result.next_sample);
             } else if (result.status === 'not_found') {
                 showFeedback(`NO ENCONTRADO: ${barcode}`, 'error');
+                updateNextSample(result.next_sample);
             }
 
         } catch (error) {
             console.error(error);
+        }
+    }
+
+    function updateNextSample(nextSample) {
+        const idEl = document.getElementById('nextSampleId');
+        const typeEl = document.getElementById('nextSampleType');
+
+        if (nextSample) {
+            idEl.textContent = nextSample.id;
+            typeEl.textContent = nextSample.qaqc;
+
+            // Visual cue for type
+            if (nextSample.qaqc !== 'Muestra Normal') {
+                typeEl.style.color = 'var(--accent-color)';
+                typeEl.style.fontWeight = 'bold';
+            } else {
+                typeEl.style.color = 'var(--text-secondary)';
+                typeEl.style.fontWeight = 'normal';
+            }
+        } else {
+            idEl.textContent = "---";
+            typeEl.textContent = "Completado";
+            showFeedback("¡Todo Escaneado!", "success");
         }
     }
 
