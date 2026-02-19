@@ -148,10 +148,13 @@ async def configure_app(req: ConfigurationRequest):
         
         # 4. Cleanup
         df["N° Muestra"] = df["N° Muestra"].astype(str).str.strip()
-        # Remove NaNs or generic placeholders
+        # Remove NaNs, "nan", "None", empty strings, and ensure it's not just whitespace
+        df = df[df["N° Muestra"].notna()]
         df = df[df["N° Muestra"] != "nan"]
         df = df[df["N° Muestra"] != "None"]
         df = df[df["N° Muestra"] != ""]
+        # Strict filter: Must have at least one alphanumeric character
+        df = df[df["N° Muestra"].str.contains(r'[a-zA-Z0-9]', na=False)]
         
         # Add control columns
         if "Scanned" not in df.columns:
@@ -304,6 +307,82 @@ async def reset_session():
     data_store["config"] = {}
     data_store["stats"] = {"total": 0, "scanned": 0, "missing": 0}
     return {"status": "success"}
+
+class SetStartIndexRequest(BaseModel):
+    sample_id: str
+
+@app.post("/set_start_index")
+async def set_start_index(req: SetStartIndexRequest):
+    if data_store["df"] is None:
+        raise HTTPException(status_code=400, detail="No data loaded")
+    
+    df = data_store["df"]
+    target_id = req.sample_id.strip()
+    
+    # Verify if ID exists
+    match = df[df["N° Muestra"] == target_id]
+    if match.empty:
+        raise HTTPException(status_code=404, detail="Muestra no encontrada")
+    
+    # Logic: Mark all SAMPLES BEFORE this one as "Scanned" (skipped) or just Scanned?
+    # User said "indicar desde donde iniciara". Usually implies skipping previous ones.
+    # Let's mark previous unscanned rows as "Skipped" to clean up the queue?
+    # Or simply: The "Next Sample" logic finds the FIRST UNSCANNED. 
+    # So if we want to start at X, we must ensure X is the first unscanned.
+    # This implies marking everything before X as Scanned (or Skipped).
+    
+    target_idx = match.index[0]
+    
+    # Mark all rows before target_idx as Scanned = True (if not already)
+    # We'll use a special user "SKIPPED" to denote this if desired, or just "System".
+    
+    # Get all indices before target
+    # Assuming dataframe is ordered by file order? Yes.
+    
+    # We need to be careful with index if it's not monotonic increasing range, but it should be standard RangeIndex from read_excel
+    # Let's rely on position using iloc/index
+    
+    # Find position of target_idx
+    # loc uses labels, iloc uses position. 
+    # If we haven't sorted or filtered much (except cleanup), index might be original.
+    
+    # Let's iterate and mark.
+    current_time = datetime.now().strftime("%H:%M:%S")
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    
+    rows_updated = 0
+    for idx in df.index:
+        if idx == target_idx:
+            break # Reached target, stop
+            
+        if not df.at[idx, "Scanned"]:
+            df.at[idx, "Scanned"] = True
+            df.at[idx, "Scan User"] = "OMITIDO"
+            df.at[idx, "Scan Date"] = current_date
+            df.at[idx, "Scan Time"] = current_time
+            rows_updated += 1
+            
+    # Update stats
+    data_store["stats"]["scanned"] = int(df["Scanned"].sum())
+    data_store["stats"]["missing"] = data_store["stats"]["total"] - data_store["stats"]["scanned"]
+    
+    # Get next sample (should be target now)
+    def get_next():
+        unscanned = df[~df["Scanned"]]
+        if not unscanned.empty:
+            first = unscanned.iloc[0]
+            return {
+                "id": str(first["N° Muestra"]),
+                "qaqc": str(first["QAQC_Type"]) if pd.notna(first["QAQC_Type"]) else "Muestra Normal",
+                "crm": str(first["CRM_Type"]) if pd.notna(first["CRM_Type"]) else ""
+            }
+        return None
+
+    return {
+        "status": "success",
+        "detail": f"Se omitieron {rows_updated} muestras anteriores.",
+        "next_sample": get_next()
+    }
 
 @app.get("/export")
 async def export_excel():

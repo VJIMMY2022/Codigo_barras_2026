@@ -361,7 +361,7 @@ h1 {
     display: flex;
     gap: 20px;
     align-items: stretch;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .scanner-input-wrapper {

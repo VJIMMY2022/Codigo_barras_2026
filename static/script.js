@@ -143,10 +143,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 // Transition to Scan
+                // Transition to Scan
                 configSection.classList.add('hidden');
                 scanSection.classList.remove('hidden');
                 recentScans.classList.remove('hidden');
                 footerActions.classList.remove('hidden');
+
+                // AUTO-SHOW DATA TABLE
+                setTimeout(() => viewDataBtn.click(), 500);
+
+                // AUTO-SHOW DATA TABLE
+                // Trigger click on viewDataBtn to show table immediately
+                // We use setTimeout to ensure transition finishes or just call it directly
+                viewDataBtn.click();
 
                 // Update Badge
                 document.getElementById('headerOperatorDisplay').textContent = operatorVal;
@@ -380,7 +389,8 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'QAQC_Type', label: 'Tipo' },
             { key: 'Scan Date', label: 'Fecha' },
             { key: 'Scan Time', label: 'Hora' },
-            { key: 'Scanned', label: 'Estado' } // Keep status
+            { key: 'Scanned', label: 'Estado' },
+            { key: 'actions', label: 'Acción' } // New Action Column
         ];
 
         tableHeader.innerHTML = targetCols.map(c => `<th>${c.label}</th>`).join('');
@@ -389,8 +399,17 @@ document.addEventListener('DOMContentLoaded', () => {
         tableBody.innerHTML = data.map(row => {
             const isScanned = row['Scanned'] === true || row['Scanned'] === 'True';
             const rowClass = isScanned ? 'scanned-row' : '';
+            const sampleId = row['N° Muestra'];
 
             const cells = targetCols.map(col => {
+                if (col.key === 'actions') {
+                    if (!isScanned) {
+                        return `<td><button class="secondary-btn small-btn" onclick="window.setStartSample('${sampleId}')">Iniciar Aquí</button></td>`;
+                    } else {
+                        return `<td>-</td>`;
+                    }
+                }
+
                 let val = row[col.key];
                 if (val === null || val === undefined) val = '';
 
@@ -404,6 +423,42 @@ document.addEventListener('DOMContentLoaded', () => {
             return `<tr class="${rowClass}">${cells}</tr>`;
         }).join('');
     }
+
+    // Expose function globally for the onclick handler
+    window.setStartSample = async function (sampleId) {
+        if (!confirm(`¿Estás seguro de iniciar en ${sampleId}? \nSe marcarán como OMITIDAS todas las muestras anteriores.`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/set_start_index', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sample_id: sampleId })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(result.detail);
+                updateNextSample(result.next_sample);
+
+                // Refresh table logic (hacky: close modal, then maybe reopen? or just update stats)
+                // Let's close modal to focus on scan
+                document.getElementById('dataModal').classList.add('hidden');
+                document.getElementById('barcodeInput').focus();
+
+                // Update stats
+                // We'd need to fetch stats again or return them.
+                // For now, next update will sync them.
+            } else {
+                alert('Error: ' + result.detail);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error de conexión');
+        }
+    };
 
     // 2. New Scan / Reset
     const newScanBtn = document.getElementById('newScanBtn');
