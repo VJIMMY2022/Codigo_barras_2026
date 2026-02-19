@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 filenameDisplay.textContent = result.filename;
 
                 // Trigger auto-load of columns with default values if possible
-                // loadColumnsBtn.click(); // Optional: Auto-click
+                loadColumnsBtn.click(); // Auto-click to show columns immediately
                 showFeedback('', 'neutral');
             } else {
                 alert('Error: ' + result.detail);
