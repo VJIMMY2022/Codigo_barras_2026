@@ -378,7 +378,36 @@ h1 {
     padding: 0 1.5rem;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    text-align: center;
+    /* Center text for better visibility */
+}
+
+.next-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.next-id {
+    font-size: 3rem;
+    /* Much larger */
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+}
+
+.next-type {
+    font-size: 1.5rem;
+    /* Larger */
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .next-label {

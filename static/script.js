@@ -385,6 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'QAQC_Type', label: 'Tipo' },
             { key: 'Scan Date', label: 'Fecha' },
             { key: 'Scan Time', label: 'Hora' },
+            { key: 'Scan User', label: 'Operador' }, // Added Operator
             { key: 'Scanned', label: 'Estado' },
             { key: 'actions', label: 'Acción' } // New Action Column
         ];
