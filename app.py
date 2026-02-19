@@ -151,8 +151,10 @@ async def configure_app(req: ConfigurationRequest):
         # Add control columns
         if "Scanned" not in df.columns:
             df["Scanned"] = False
-        if "Scan Timestamp" not in df.columns:
-            df["Scan Timestamp"] = ""
+        if "Scan Date" not in df.columns:
+            df["Scan Date"] = ""
+        if "Scan Time" not in df.columns:
+            df["Scan Time"] = ""
         if "Scan User" not in df.columns:
             df["Scan User"] = ""
         if "QAQC_Type" not in df.columns:
@@ -196,7 +198,9 @@ async def scan_sample(scan_req: ScanRequest):
     
     df = data_store["df"]
     barcode = scan_req.barcode.strip()
-    user = scan_req.user.strip()
+    # Use operator from config if available (preferred), else fallback to request
+    config_operator = data_store.get("config", {}).get("operator_name")
+    user = config_operator if config_operator else scan_req.user.strip()
     
     match = df[df["N° Muestra"] == barcode]
     
@@ -226,19 +230,23 @@ async def scan_sample(scan_req: ScanRequest):
     if pd.notna(qaqc_val) and str(qaqc_val).strip() != "":
         qaqc_display = str(qaqc_val)
     
+    # Strict Duplicate Check: Return error, DO NOT update
     if df.at[idx, "Scanned"]:
         return JSONResponse(content={
-            "status": "duplicate", 
+            "status": "duplicate_error", 
+            "detail": f"La muestra {barcode} ya fue escaneada previamente.",
             "barcode": barcode, 
-            "timestamp": df.at[idx, "Scan Timestamp"],
-            "scanned_by": df.at[idx, "Scan User"],
             "qaqc_type": qaqc_display,
             "next_sample": get_next_sample(df)
         })
     
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now_dt = datetime.now()
+    now_date = now_dt.strftime("%Y-%m-%d")
+    now_time = now_dt.strftime("%H:%M:%S")
+    
     df.at[idx, "Scanned"] = True
-    df.at[idx, "Scan Timestamp"] = now
+    df.at[idx, "Scan Date"] = now_date
+    df.at[idx, "Scan Time"] = now_time
     df.at[idx, "Scan User"] = user
     
     data_store["stats"]["scanned"] += 1

@@ -101,8 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Confirm Configuration
     confirmConfigBtn.addEventListener('click', async () => {
         const shipmentVal = document.getElementById('shipmentInput').value;
+        const operatorVal = document.getElementById('operatorInput').value;
+
         if (!shipmentVal.trim()) {
             alert("Ingrese un Número de Envío");
+            return;
+        }
+        if (!operatorVal.trim()) {
+            alert("Ingrese el Nombre del Operador");
             return;
         }
 
@@ -111,7 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
             data_start_row: parseInt(dataRowInput.value),
             sample_col: sampleColSelect.value,
             qaqc_col: qaqcColSelect.value || null,
-            shipment_number: shipmentVal
+            shipment_number: shipmentVal,
+            operator_name: operatorVal
         };
 
         if (!config.sample_col) {
@@ -135,6 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 recentScans.classList.remove('hidden');
                 footerActions.classList.remove('hidden');
 
+                // Update Badge
+                document.getElementById('headerOperatorDisplay').textContent = operatorVal;
+
                 // Init Stats
                 totalCountEl.textContent = result.total;
                 missingCountEl.textContent = result.total;
@@ -157,20 +167,21 @@ document.addEventListener('DOMContentLoaded', () => {
     barcodeInput.addEventListener('keydown', async (e) => {
         if (e.key === 'Enter') {
             const barcode = barcodeInput.value;
-            const user = document.getElementById('userInput').value;
+            // User is now in config, but we send it just in case logic depends on it, 
+            // though backend prefers config value now.
             if (!barcode) return;
             barcodeInput.value = '';
 
-            await processScan(barcode, user);
+            await processScan(barcode);
         }
     });
 
-    async function processScan(barcode, user) {
+    async function processScan(barcode) {
         try {
             const response = await fetch('/scan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ barcode, user })
+                body: JSON.stringify({ barcode, user: "ConfiguredUser" })
             });
 
             const result = await response.json();
@@ -180,9 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 addToList(result.data, 'success', result.qaqc_type);
                 updateStats(result.stats);
                 updateNextSample(result.next_sample);
-            } else if (result.status === 'duplicate') {
-                showFeedback(`DUPLICADO: ${barcode}`, 'duplicate');
-                addToList({ 'N° Muestra': barcode }, 'duplicate', result.qaqc_type);
+            } else if (result.status === 'duplicate_error') {
+                // STRICT DUPLICATE HANDLING: Alert Only
+                showFeedback(`¡DUPLICADO! ${barcode} YA ESCANEADO`, 'duplicate'); // CSS animation handles visual alert
+                alert(`ALERTA: La muestra ${barcode} YA FUE ESCANEADA.\nNO SE REGISTRARÁ NUEVAMENTE.`);
                 updateNextSample(result.next_sample);
             } else if (result.status === 'not_found') {
                 showFeedback(`NO ENCONTRADO: ${barcode}`, 'error');
@@ -238,10 +250,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addToList(data, type, qaqcType) {
+        // If strict duplicate error, we don't add to list? 
+        // User said "manda un mensaje de alerta... pero no lo registres".
+        // Code above doesn't call addToList for duplicate_error.
+
         const li = document.createElement('li');
         li.className = `scan-item ${type}`;
 
         const mainText = data['N° Muestra'] || data['barcode'] || '???';
+        const shipment = data['N° Envío'] || '-';
+        const date = data['Scan Date'] || '';
+        const time = data['Scan Time'] || new Date().toLocaleTimeString();
 
         let badgeHtml = '';
         if (qaqcType) {
@@ -249,12 +268,19 @@ document.addEventListener('DOMContentLoaded', () => {
             badgeHtml = `<span class="qaqc-badge ${badgeClass}">${qaqcType}</span>`;
         }
 
+        // Detailed layout for list item
         li.innerHTML = `
-            <div>
-                <strong>${mainText}</strong>
-                ${badgeHtml}
+            <div style="display: flex; flex-direction: column;">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                     <strong>${mainText}</strong>
+                     ${badgeHtml}
+                </div>
+                <span class="text-secondary" style="font-size: 0.8rem;">Ref: ${shipment}</span>
             </div>
-            <span>${new Date().toLocaleTimeString()}</span>
+            <div style="text-align: right;">
+                 <div style="font-weight: bold;">${time}</div>
+                 <div class="text-secondary" style="font-size: 0.8rem;">${date}</div>
+            </div>
         `;
 
         scanList.prepend(li);
@@ -266,7 +292,13 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackMsg.className = 'feedback-msg';
         if (type === 'success') feedbackMsg.classList.add('scan-success');
         if (type === 'error') feedbackMsg.classList.add('scan-error');
-        if (type === 'duplicate') feedbackMsg.classList.add('scan-duplicate');
+        if (type === 'duplicate') {
+            feedbackMsg.classList.add('scan-duplicate');
+            // Add shake animation
+            feedbackMsg.style.animation = 'none';
+            feedbackMsg.offsetHeight; /* trigger reflow */
+            feedbackMsg.style.animation = 'shake 0.5s';
+        }
     }
 
     function updateStats(stats) {
@@ -332,32 +364,29 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Headers
-        const cols = Object.keys(data[0]);
-        // Priority columns to showing first/visible
-        const priorityCols = ['N° Muestra', 'QAQC_Type', 'Scanned', 'Scan Timestamp'];
-
-        // Filter cols to show valuable info (optional: show all)
-        // For now, let's show all but sort priority first
-        const sortedCols = [
-            ...priorityCols.filter(c => cols.includes(c)),
-            ...cols.filter(c => !priorityCols.includes(c))
+        // Specific columns user requested
+        const targetCols = [
+            { key: 'N° Envío', label: 'Envío' },
+            { key: 'N° Muestra', label: 'Muestra' },
+            { key: 'QAQC_Type', label: 'Tipo' },
+            { key: 'Scan Date', label: 'Fecha' },
+            { key: 'Scan Time', label: 'Hora' },
+            { key: 'Scanned', label: 'Estado' } // Keep status
         ];
 
-        tableHeader.innerHTML = sortedCols.map(c => `<th>${c}</th>`).join('');
+        tableHeader.innerHTML = targetCols.map(c => `<th>${c.label}</th>`).join('');
 
         // Rows
         tableBody.innerHTML = data.map(row => {
             const isScanned = row['Scanned'] === true || row['Scanned'] === 'True';
             const rowClass = isScanned ? 'scanned-row' : '';
 
-            const cells = sortedCols.map(col => {
-                let val = row[col];
+            const cells = targetCols.map(col => {
+                let val = row[col.key];
                 if (val === null || val === undefined) val = '';
 
-                // Format specific columns if needed
-                if (col === 'Scanned') {
-                    val = isScanned ? '✅' : 'Wait...';
+                if (col.key === 'Scanned') {
+                    val = isScanned ? '✅' : 'Pendiente';
                 }
 
                 return `<td>${val}</td>`;
