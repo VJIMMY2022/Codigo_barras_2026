@@ -159,6 +159,12 @@ async def configure_app(req: ConfigurationRequest):
         # Add control columns
         if "Scanned" not in df.columns:
             df["Scanned"] = False
+        else:
+            # Ensure proper boolean type if re-uploading an exported file
+            # Excel might save booleans as TRUE/FALSE strings or 1/0
+            df["Scanned"] = df["Scanned"].astype(str).str.upper().map({
+                'TRUE': True, 'FALSE': False, '1': True, '0': False, 'YES': True, 'NO': False
+            }).fillna(False)
         if "Scan Date" not in df.columns:
             df["Scan Date"] = ""
         if "Scan Time" not in df.columns:
@@ -277,15 +283,16 @@ async def scan_sample(scan_req: ScanRequest):
         else:
             clean_data[k] = v
 
-    return {
+    # Safe dictionary construction
+    response_data = {
         "status": "success", 
         "data": clean_data, 
-        "stats": data_store["stats"],
         "stats": data_store["stats"],
         "qaqc_type": qaqc_display,
         "crm_type": crm_display,
         "next_sample": get_next_sample(df)
     }
+    return response_data
 
 @app.get("/get_data")
 async def get_data():

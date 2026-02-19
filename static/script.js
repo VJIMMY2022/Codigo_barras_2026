@@ -216,6 +216,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
+            showFeedback("Error de Sistema (ver consola)", "error");
+            alert("Error al procesar el escaneo. Verifique su conexión o recargue la página.");
         }
     }
 
@@ -366,6 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error loading table:', error);
             // Don't alert aggressively to avoid spamming if polling
+            const tableBody = document.getElementById('tableBody');
+            if (tableBody) tableBody.innerHTML = `<tr><td colspan="6" style="color:red;">Error al cargar datos: ${error.message}</td></tr>`;
         }
     }
 
