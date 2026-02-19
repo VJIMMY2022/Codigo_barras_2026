@@ -342,12 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- New Features ---
 
     // 1. View Data
-    const viewDataBtn = document.getElementById('viewDataBtn');
-    const dataModal = document.getElementById('dataModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const tableHeader = document.getElementById('tableHeader');
-    const tableBody = document.getElementById('tableBody');
-
     // --- New Features ---
 
     // 1. Data Table Logic
