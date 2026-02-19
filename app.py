@@ -243,6 +243,7 @@ async def scan_sample(scan_req: ScanRequest):
     idx = match.index[0]
     
     # Get QAQC Info
+    qaqc_val = df.at[idx, "QAQC_Type"]
     qaqc_display = "Muestra Normal"
     if pd.notna(qaqc_val) and str(qaqc_val).strip() != "":
         qaqc_display = str(qaqc_val)
