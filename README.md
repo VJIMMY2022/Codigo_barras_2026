@@ -48,3 +48,17 @@ Una aplicación web moderna para la verificación y control de muestras mediante
 2. **Configurar**: Indica en qué fila están los encabezados y selecciona las columnas de "N° Muestra" y "QAQC".
 3. **Escanear**: Usa tu lector de código de barras o escribe el código.
 4. **Exportar**: Al finalizar, descarga el reporte actualizado.
+
+## Despliegue en Render (Gratis)
+
+Para publicar tu aplicación en internet:
+
+1. Sube tu código a GitHub (si no lo has hecho).
+2. Créate una cuenta en [Render.com](https://render.com).
+3. Haz clic en **"New + "** y selecciona **"Web Service"**.
+4. Conecta tu cuenta de GitHub y selecciona este repositorio (`Codigo_barras_2026`).
+5. Render detectará automáticamente el archivo `render.yaml` o la configuración.
+6. Haz clic en **"Create Web Service"**.
+7. ¡Listo! En unos minutos te dará una URL (ej: `https://codigo-barras.onrender.com`) para compartir.
+
+> **Nota**: En la versión gratuita, la aplicación puede tardar unos segundos en "despertar" si nadie la ha usado en un tiempo. Además, los datos cargados se borrarán si la aplicación se reinicia (ya que no usa base de datos permanente).
