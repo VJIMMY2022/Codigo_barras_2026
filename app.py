@@ -292,12 +292,36 @@ async def get_data():
     if data_store["df"] is None:
         return {"data": []}
     
-    # Replace NaN with null for JSON compatibility
+    # 1. Replace NaN/None with None (which becomes null in JSON)
     df_clean = data_store["df"].where(pd.notnull(data_store["df"]), None)
     
-    # Convert to list of dicts
+    # 2. Handle specific types that might break JSON serialization
+    # Convert Timestamp/datetime objects to strings
+    for col in df_clean.columns:
+        if pd.api.types.is_datetime64_any_dtype(df_clean[col]):
+            df_clean[col] = df_clean[col].astype(str).replace({"NaT": None, "nan": None})
+            
+    # Convert potential numpy types to native Python types via to_dict
     records = df_clean.to_dict(orient="records")
-    return {"data": records}
+    
+    # Double check for NaN scalars in the list of dicts (sometimes they persist)
+    # A simple way is to iterate and clean, but pandas .where usually handles it.
+    # Let's ensure strict compatibility.
+    import numpy as np
+    def clean_record(record):
+        new_record = {}
+        for k, v in record.items():
+            if v is None:
+                new_record[k] = None
+            elif isinstance(v, float) and np.isnan(v):
+                new_record[k] = None
+            else:
+                new_record[k] = v
+        return new_record
+
+    cleaned_records = [clean_record(r) for r in records]
+    
+    return {"data": cleaned_records}
 
 @app.post("/reset")
 async def reset_session():

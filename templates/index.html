@@ -141,24 +141,24 @@
         </div>
 
         <!-- Data Table Modal/Section -->
-        <div id="dataModal" class="modal hidden">
-            <div class="modal-content glass-panel">
-                <div class="modal-header">
-                    <h2>Datos Cargados</h2>
-                    <button id="closeModalBtn" class="close-btn">&times;</button>
-                </div>
-                <div class="table-container">
-                    <table id="dataTable">
-                        <thead>
-                            <tr id="tableHeader"><!-- Dynamic --></tr>
-                        </thead>
-                        <tbody>
-                            <tr id="tableBody"><!-- Dynamic --></tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Data Section (Persistent) -->
+        <div id="dataSection" class="glass-panel hidden fade-in" style="margin-top: 2rem;">
+            <div class="row space-between align-center" style="margin-bottom: 1rem;">
+                <h2>Registros de Muestras</h2>
+                <!-- Optional: Filter or CSV download here -->
+            </div>
+            <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                <table id="dataTable">
+                    <thead>
+                        <tr id="tableHeader"><!-- Dynamic --></tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Dynamic -->
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
     </div>
 
     <script src="/static/script.js"></script>

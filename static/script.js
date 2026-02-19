@@ -150,12 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 footerActions.classList.remove('hidden');
 
                 // AUTO-SHOW DATA TABLE
-                setTimeout(() => viewDataBtn.click(), 500);
-
-                // AUTO-SHOW DATA TABLE
-                // Trigger click on viewDataBtn to show table immediately
-                // We use setTimeout to ensure transition finishes or just call it directly
-                viewDataBtn.click();
+                loadTableData();
 
                 // Update Badge
                 document.getElementById('headerOperatorDisplay').textContent = operatorVal;
@@ -206,6 +201,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 addToList(result.data, 'success', result.qaqc_type, result.crm_type);
                 updateStats(result.stats);
                 updateNextSample(result.next_sample);
+
+                // Refresh Persistent Table
+                loadTableData();
             } else if (result.status === 'duplicate_error') {
                 // STRICT DUPLICATE HANDLING: Alert Only
                 showFeedback(`¡DUPLICADO! ${barcode} YA ESCANEADO`, 'duplicate'); // CSS animation handles visual alert
@@ -348,33 +346,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableHeader = document.getElementById('tableHeader');
     const tableBody = document.getElementById('tableBody');
 
-    viewDataBtn.addEventListener('click', async () => {
-        showFeedback('Cargando datos...', 'neutral');
+    // --- New Features ---
+
+    // 1. Data Table Logic
+    // const viewDataBtn = document.getElementById('viewDataBtn'); // Removed
+    const dataSection = document.getElementById('dataSection');
+    // const dataModal ... // Removed
+    const tableHeader = document.getElementById('tableHeader');
+    const tableBody = document.getElementById('tableBody');
+
+    // Function to load and render table
+    async function loadTableData() {
+        // showFeedback('Actualizando tabla...', 'neutral'); 
         try {
             const response = await fetch('/get_data');
             const result = await response.json();
-
             renderTable(result.data);
-            dataModal.classList.remove('hidden');
-            showFeedback('', 'neutral');
+            dataSection.classList.remove('hidden');
         } catch (error) {
-            console.error(error);
-            alert('Error al cargar datos');
+            console.error('Error loading table:', error);
+            // Don't alert aggressively to avoid spamming if polling
         }
-    });
+    }
 
-    closeModalBtn.addEventListener('click', () => {
-        dataModal.classList.add('hidden');
-        barcodeInput.focus();
-    });
+    // Make it available globally if needed, or just use internally
+    window.refreshTable = loadTableData;
 
-    // Close modal on click outside
-    dataModal.addEventListener('click', (e) => {
-        if (e.target === dataModal) {
-            dataModal.classList.add('hidden');
-            barcodeInput.focus();
-        }
-    });
+    // No modal event listeners needed anymore
 
     function renderTable(data) {
         if (!data || data.length === 0) {
