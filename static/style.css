@@ -1,0 +1,333 @@
+:root {
+    --bg-dark: #0f172a;
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-color: #3b82f6;
+    --success-color: #22c55e;
+    --error-color: #ef4444;
+    --warning-color: #eab308;
+    --font-main: 'Outfit', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-main);
+    background-color: var(--bg-dark);
+    background-image:
+        radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+        radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.user-control input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 8px;
+    outline: none;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 15px;
+}
+
+.stat-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+.success-glow {
+    border-bottom: 3px solid var(--success-color);
+}
+
+.warning-glow {
+    border-bottom: 3px solid var(--warning-color);
+}
+
+.upload-area {
+    text-align: center;
+    padding: 40px;
+    border: 2px dashed var(--glass-border);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-color);
+}
+
+.primary-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: transform 0.2s;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Scanner Input */
+.scanner-input-wrapper {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+#barcodeInput {
+    width: 100%;
+    padding: 20px;
+    font-size: 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--accent-color);
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#barcodeInput:focus {
+    outline: none;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+
+.feedback-msg {
+    text-align: center;
+    font-size: 1.2rem;
+    min-height: 1.5em;
+    font-weight: 600;
+}
+
+.scan-success {
+    color: var(--success-color);
+}
+
+.scan-error {
+    color: var(--error-color);
+}
+
+.scan-duplicate {
+    color: var(--warning-color);
+}
+
+.recent-scans ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.scan-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.actions-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.secondary-btn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+/* Additions for Select Element */
+.premium-select {
+    width: 100%;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    color: white;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-family: var(--font-main);
+    cursor: pointer;
+}
+
+.premium-select option {
+    background: var(--bg-dark);
+    color: white;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.select-wrapper {
+    margin: 20px 0;
+}
+
+/* Configuration Grid */
+.config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.align-end {
+    justify-content: flex-end;
+}
+
+.premium-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.scan-tag {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    margin-left: 10px;
+    color: var(--accent-color);
+}
+
+.qaqc-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 10px;
+    background: var(--glass-border);
+}
+
+.qaqc-badge.normal {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.qaqc-badge.control {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    display: block;
+}

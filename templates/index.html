@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Muestras - Premium Scanner</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="glass-panel">
+            <div class="header-left">
+                <h1>Control de Envíos</h1>
+                <small id="filenameDisplay" class="text-secondary"></small>
+            </div>
+            <div class="user-control">
+                <span>Operador:</span>
+                <input type="text" id="userInput" placeholder="Nombre Usuario" value="Operador 1">
+            </div>
+        </header>
+
+        <!-- Dashboard Stats -->
+        <div class="stats-container">
+            <div class="stat-card glass-panel">
+                <h3>Total Muestras</h3>
+                <span id="totalCount" class="stat-value">0</span>
+            </div>
+            <div class="stat-card glass-panel success-glow">
+                <h3>Verificadas</h3>
+                <span id="scannedCount" class="stat-value">0</span>
+            </div>
+            <div class="stat-card glass-panel warning-glow">
+                <h3>Faltantes</h3>
+                <span id="missingCount" class="stat-value">0</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Upload -->
+        <div id="uploadSection" class="upload-area glass-panel">
+            <h2>1. Cargar Archivo de Muestras</h2>
+            <p>Arrastra tu archivo Excel aquí o haz clic para buscar</p>
+            <input type="file" id="fileInput" accept=".xls,.xlsx" hidden>
+            <button class="primary-btn" onclick="document.getElementById('fileInput').click()">Seleccionar
+                Archivo</button>
+        </div>
+
+        <!-- Step 2: Configuration (New) -->
+        <div id="configSection" class="glass-panel hidden">
+            <h2>2. Configuración de Lectura</h2>
+
+            <div class="config-grid">
+                <div class="input-group">
+                    <label>Fila de Encabezados (Excel)</label>
+                    <input type="number" id="headerRowInput" value="18" class="premium-input">
+                </div>
+                <div class="input-group">
+                    <label>Fila Inicio de Datos (Excel)</label>
+                    <input type="number" id="dataRowInput" value="19" class="premium-input">
+                </div>
+                <div class="input-group align-end">
+                    <button id="loadColumnsBtn" class="secondary-btn">Cargar Columnas</button>
+                </div>
+            </div>
+
+            <div id="columnSelectors" class="hidden fade-in">
+                <div class="input-group full-width">
+                    <label>Columna de Muestras (Códigos)*</label>
+                    <select id="sampleColSelect" class="premium-select"></select>
+                </div>
+                <div class="input-group full-width">
+                    <label>Columna QAQC (Tipo de Control)</label>
+                    <select id="qaqcColSelect" class="premium-select">
+                        <option value="">-- Ninguna --</option>
+                    </select>
+                </div>
+                <button id="confirmConfigBtn" class="primary-btn full-width">Confirmar Configuración</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Scanning -->
+        <div id="scanSection" class="scan-area glass-panel hidden">
+            <div class="scanner-input-wrapper">
+                <input type="text" id="barcodeInput" placeholder="ESCANEAR CÓDIGO AQUÍ" autocomplete="off" autofocus>
+                <div class="scan-indicator"></div>
+            </div>
+            <div id="scanFeedback" class="feedback-msg">Listo para escanear...</div>
+        </div>
+
+        <!-- Recent Scans List -->
+        <div id="recentScans" class="recent-scans glass-panel hidden">
+            <h3>Últimos Registros</h3>
+            <ul id="scanList">
+                <!-- Items added dynamically -->
+            </ul>
+        </div>
+
+        <div class="actions-footer hidden" id="footerActions">
+            <button class="secondary-btn" id="exportBtn">Exportar Excel Actualizado</button>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
