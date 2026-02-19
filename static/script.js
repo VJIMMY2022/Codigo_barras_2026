@@ -247,8 +247,104 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!scanSection.classList.contains('hidden')
             && e.target.tagName !== 'INPUT'
             && e.target.tagName !== 'BUTTON'
-            && e.target.tagName !== 'SELECT') {
+            && e.target.tagName !== 'SELECT'
+            && !document.getElementById('dataModal').contains(e.target)) { // Don't steal focus if in modal
             barcodeInput.focus();
+        }
+    });
+
+    // --- New Features ---
+
+    // 1. View Data
+    const viewDataBtn = document.getElementById('viewDataBtn');
+    const dataModal = document.getElementById('dataModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const tableHeader = document.getElementById('tableHeader');
+    const tableBody = document.getElementById('tableBody');
+
+    viewDataBtn.addEventListener('click', async () => {
+        showFeedback('Cargando datos...', 'neutral');
+        try {
+            const response = await fetch('/get_data');
+            const result = await response.json();
+
+            renderTable(result.data);
+            dataModal.classList.remove('hidden');
+            showFeedback('', 'neutral');
+        } catch (error) {
+            console.error(error);
+            alert('Error al cargar datos');
+        }
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        dataModal.classList.add('hidden');
+        barcodeInput.focus();
+    });
+
+    // Close modal on click outside
+    dataModal.addEventListener('click', (e) => {
+        if (e.target === dataModal) {
+            dataModal.classList.add('hidden');
+            barcodeInput.focus();
+        }
+    });
+
+    function renderTable(data) {
+        if (!data || data.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="5">No hay datos</td></tr>';
+            return;
+        }
+
+        // Headers
+        const cols = Object.keys(data[0]);
+        // Priority columns to showing first/visible
+        const priorityCols = ['N° Muestra', 'QAQC_Type', 'Scanned', 'Scan Timestamp'];
+
+        // Filter cols to show valuable info (optional: show all)
+        // For now, let's show all but sort priority first
+        const sortedCols = [
+            ...priorityCols.filter(c => cols.includes(c)),
+            ...cols.filter(c => !priorityCols.includes(c))
+        ];
+
+        tableHeader.innerHTML = sortedCols.map(c => `<th>${c}</th>`).join('');
+
+        // Rows
+        tableBody.innerHTML = data.map(row => {
+            const isScanned = row['Scanned'] === true || row['Scanned'] === 'True';
+            const rowClass = isScanned ? 'scanned-row' : '';
+
+            const cells = sortedCols.map(col => {
+                let val = row[col];
+                if (val === null || val === undefined) val = '';
+
+                // Format specific columns if needed
+                if (col === 'Scanned') {
+                    val = isScanned ? '✅' : 'Wait...';
+                }
+
+                return `<td>${val}</td>`;
+            }).join('');
+
+            return `<tr class="${rowClass}">${cells}</tr>`;
+        }).join('');
+    }
+
+    // 2. New Scan / Reset
+    const newScanBtn = document.getElementById('newScanBtn');
+
+    newScanBtn.addEventListener('click', async () => {
+        if (!confirm('¿Estás seguro? Se BORRARÁN todos los datos cargados y el progreso actual.')) {
+            return;
+        }
+
+        try {
+            await fetch('/reset', { method: 'POST' });
+            location.reload(); // Reload page to reset UI state completely
+        } catch (error) {
+            console.error(error);
+            alert('Error al reiniciar');
         }
     });
 

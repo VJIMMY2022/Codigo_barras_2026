@@ -98,8 +98,38 @@
             </ul>
         </div>
 
-        <div class="actions-footer hidden" id="footerActions">
-            <button class="secondary-btn" id="exportBtn">Exportar Excel Actualizado</button>
+        <div id="footerActions" class="hidden fade-in">
+            <div class="action-buttons">
+                <button id="viewDataBtn" class="secondary-btn">
+                    <i class="fas fa-table"></i> Ver Tabla de Datos
+                </button>
+                <button id="exportBtn" class="primary-btn">
+                    <i class="fas fa-file-export"></i> Exportar Excel
+                </button>
+            </div>
+            <button id="newScanBtn" class="danger-btn mt-2">
+                <i class="fas fa-redo"></i> Nuevo Escaneo
+            </button>
+        </div>
+
+        <!-- Data Table Modal/Section -->
+        <div id="dataModal" class="modal hidden">
+            <div class="modal-content glass-panel">
+                <div class="modal-header">
+                    <h2>Datos Cargados</h2>
+                    <button id="closeModalBtn" class="close-btn">&times;</button>
+                </div>
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead>
+                            <tr id="tableHeader"><!-- Dynamic --></tr>
+                        </thead>
+                        <tbody>
+                            <tr id="tableBody"><!-- Dynamic --></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 

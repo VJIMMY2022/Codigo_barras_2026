@@ -229,6 +229,27 @@ async def scan_sample(scan_req: ScanRequest):
         "qaqc_type": qaqc_display
     }
 
+@app.get("/get_data")
+async def get_data():
+    if data_store["df"] is None:
+        return {"data": []}
+    
+    # Replace NaN with null for JSON compatibility
+    df_clean = data_store["df"].where(pd.notnull(data_store["df"]), None)
+    
+    # Convert to list of dicts
+    records = df_clean.to_dict(orient="records")
+    return {"data": records}
+
+@app.post("/reset")
+async def reset_session():
+    data_store["df"] = None
+    data_store["raw_contents"] = None
+    data_store["filename"] = None
+    data_store["config"] = {}
+    data_store["stats"] = {"total": 0, "scanned": 0, "missing": 0}
+    return {"status": "success"}
+
 @app.get("/export")
 async def export_excel():
     if data_store["df"] is None:
