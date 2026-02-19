@@ -85,7 +85,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 // Populate Selects
                 populateSelect(sampleColSelect, result.columns, ['muestras', 'muestra', 'sample', 'id', 'código', 'codigo']);
-                populateSelect(qaqcColSelect, result.columns, ['qaqc', 'control', 'std', 'tipo']);
+                populateSelect(qaqcColSelect, result.columns, ['qaqc', 'control', 'tipo']);
+
+                const crmSelect = document.getElementById('crmColSelect');
+                // Auto-select keywords. User mentioned "default is column F" (which might be named 'CRM', 'STD', or just be the 6th col).
+                // We'll search for common names. If user wants specific index, they can select manually.
+                populateSelect(crmSelect, result.columns, ['crm', 'std', 'estandar', 'standard', 'valor']);
 
                 // Show Selectors
                 columnSelectors.classList.remove('hidden');
@@ -117,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data_start_row: parseInt(dataRowInput.value),
             sample_col: sampleColSelect.value,
             qaqc_col: qaqcColSelect.value || null,
+            crm_col: document.getElementById('crmColSelect').value || null,
             shipment_number: shipmentVal,
             operator_name: operatorVal
         };
@@ -188,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.status === 'success') {
                 showFeedback(`${barcode} OK`, 'success');
-                addToList(result.data, 'success', result.qaqc_type);
+                addToList(result.data, 'success', result.qaqc_type, result.crm_type);
                 updateStats(result.stats);
                 updateNextSample(result.next_sample);
             } else if (result.status === 'duplicate_error') {
@@ -231,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function populateSelect(selectEl, columns, keywords) {
         selectEl.innerHTML = '';
-        if (selectEl.id === 'qaqcColSelect') {
+        if (selectEl.id === 'qaqcColSelect' || selectEl.id === 'crmColSelect') {
             selectEl.innerHTML = '<option value="">-- Ninguna --</option>';
         }
 
@@ -249,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function addToList(data, type, qaqcType) {
+    function addToList(data, type, qaqcType, crmType) {
         // If strict duplicate error, we don't add to list? 
         // User said "manda un mensaje de alerta... pero no lo registres".
         // Code above doesn't call addToList for duplicate_error.
@@ -264,8 +270,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let badgeHtml = '';
         if (qaqcType) {
+            let label = qaqcType;
+            if (crmType) label += ` - ${crmType}`;
+
             const badgeClass = qaqcType === 'Muestra Normal' ? 'normal' : 'control';
-            badgeHtml = `<span class="qaqc-badge ${badgeClass}">${qaqcType}</span>`;
+            badgeHtml = `<span class="qaqc-badge ${badgeClass}">${label}</span>`;
         }
 
         // Detailed layout for list item

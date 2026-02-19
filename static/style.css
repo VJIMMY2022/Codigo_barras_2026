@@ -356,6 +356,60 @@ h1 {
     border: 1px solid var(--accent-color);
 }
 
+/* Scan Section Layout */
+.scan-input-row {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+    margin-bottom: 2rem;
+}
+
+.scanner-input-wrapper {
+    flex: 2;
+    position: relative;
+}
+
+/* Next Sample Info Box */
+.next-sample-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 1.5rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.next-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.next-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.next-id {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.next-type {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.glass-panel-light {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
 /* Next Sample Guidance */
 .next-sample-box {
     background: rgba(59, 130, 246, 0.1);

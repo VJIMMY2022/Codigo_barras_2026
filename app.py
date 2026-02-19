@@ -42,6 +42,9 @@ class ConfigurationRequest(BaseModel):
     data_start_row: int
     sample_col: str
     qaqc_col: Optional[str] = None
+    crm_col: Optional[str] = None
+    shipment_number: str
+    operator_name: str
 
 @app.get("/")
 async def read_root(request: Request):
@@ -138,6 +141,8 @@ async def configure_app(req: ConfigurationRequest):
         rename_map = {req.sample_col: "N° Muestra"}
         if req.qaqc_col and req.qaqc_col in df.columns:
             rename_map[req.qaqc_col] = "QAQC_Type"
+        if req.crm_col and req.crm_col in df.columns:
+            rename_map[req.crm_col] = "CRM_Type"
             
         df.rename(columns=rename_map, inplace=True)
         
@@ -158,7 +163,9 @@ async def configure_app(req: ConfigurationRequest):
         if "Scan User" not in df.columns:
             df["Scan User"] = ""
         if "QAQC_Type" not in df.columns:
-            df["QAQC_Type"] = None 
+            df["QAQC_Type"] = None
+        if "CRM_Type" not in df.columns:
+            df["CRM_Type"] = None 
             
         # Add Shipment Number
         df["N° Envío"] = req.shipment_number
@@ -178,7 +185,8 @@ async def configure_app(req: ConfigurationRequest):
             first_unscanned = unscanned.iloc[0]
             next_sample = {
                 "id": str(first_unscanned["N° Muestra"]),
-                "qaqc": str(first_unscanned["QAQC_Type"]) if pd.notna(first_unscanned["QAQC_Type"]) else "Muestra Normal"
+                "qaqc": str(first_unscanned["QAQC_Type"]) if pd.notna(first_unscanned["QAQC_Type"]) else "Muestra Normal",
+                "crm": str(first_unscanned["CRM_Type"]) if pd.notna(first_unscanned["CRM_Type"]) else ""
             }
         
         return {
@@ -211,7 +219,8 @@ async def scan_sample(scan_req: ScanRequest):
             first = unscanned.iloc[0]
             return {
                 "id": str(first["N° Muestra"]),
-                "qaqc": str(first["QAQC_Type"]) if pd.notna(first["QAQC_Type"]) else "Muestra Normal"
+                "qaqc": str(first["QAQC_Type"]) if pd.notna(first["QAQC_Type"]) else "Muestra Normal",
+                "crm": str(first["CRM_Type"]) if pd.notna(first["CRM_Type"]) else ""
             }
         return None
 
@@ -225,10 +234,14 @@ async def scan_sample(scan_req: ScanRequest):
     idx = match.index[0]
     
     # Get QAQC Info
-    qaqc_val = df.at[idx, "QAQC_Type"]
     qaqc_display = "Muestra Normal"
     if pd.notna(qaqc_val) and str(qaqc_val).strip() != "":
         qaqc_display = str(qaqc_val)
+        
+    crm_val = df.at[idx, "CRM_Type"]
+    crm_display = ""
+    if pd.notna(crm_val) and str(crm_val).strip() != "":
+        crm_display = str(crm_val)
     
     # Strict Duplicate Check: Return error, DO NOT update
     if df.at[idx, "Scanned"]:
@@ -237,6 +250,7 @@ async def scan_sample(scan_req: ScanRequest):
             "detail": f"La muestra {barcode} ya fue escaneada previamente.",
             "barcode": barcode, 
             "qaqc_type": qaqc_display,
+            "crm_type": crm_display,
             "next_sample": get_next_sample(df)
         })
     
@@ -264,7 +278,9 @@ async def scan_sample(scan_req: ScanRequest):
         "status": "success", 
         "data": clean_data, 
         "stats": data_store["stats"],
+        "stats": data_store["stats"],
         "qaqc_type": qaqc_display,
+        "crm_type": crm_display,
         "next_sample": get_next_sample(df)
     }
 

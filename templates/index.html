@@ -88,15 +88,32 @@
                         <option value="">-- Ninguna --</option>
                     </select>
                 </div>
+                <div class="input-group full-width">
+                    <label>Columna CRM/Estándar</label>
+                    <select id="crmColSelect" class="premium-select">
+                        <option value="">-- Ninguna --</option>
+                    </select>
+                </div>
                 <button id="confirmConfigBtn" class="primary-btn full-width">Confirmar Configuración</button>
             </div>
         </div>
 
         <!-- Step 3: Scanning -->
         <div id="scanSection" class="scan-area glass-panel hidden">
-            <div class="scanner-input-wrapper">
-                <input type="text" id="barcodeInput" placeholder="ESCANEAR CÓDIGO AQUÍ" autocomplete="off" autofocus>
-                <div class="scan-indicator"></div>
+            <div class="scan-input-row">
+                <div class="scanner-input-wrapper">
+                    <input type="text" id="barcodeInput" placeholder="ESCANEAR CÓDIGO AQUÍ" autocomplete="off"
+                        autofocus>
+                    <div class="scan-indicator"></div>
+                </div>
+
+                <div class="next-sample-info glass-panel-light">
+                    <span class="next-label">Siguiente Muestra:</span>
+                    <div class="next-details">
+                        <span id="nextSampleId" class="next-id">---</span>
+                        <span id="nextSampleType" class="next-type">---</span>
+                    </div>
+                </div>
             </div>
             <div id="scanFeedback" class="feedback-msg">Listo para escanear...</div>
         </div>
