@@ -154,7 +154,18 @@ async def configure_app(req: ConfigurationRequest):
         df = df[df["N° Muestra"] != "None"]
         df = df[df["N° Muestra"] != ""]
         # Strict filter: Must have at least one alphanumeric character
-        df = df[df["N° Muestra"].str.contains(r'[a-zA-Z0-9]', na=False)]
+        # df = df[df["N° Muestra"].str.contains(r'[a-zA-Z0-9]', na=False)]
+        
+        # USER REQUEST: Only numbers. Text excluded.
+        # We'll try to convert to numeric. If it fails (NaN), we drop it.
+        # This allows integers and floats (e.g. 86761, 86761.0) but removes "Text", "86761A"
+        df["is_numeric"] = pd.to_numeric(df["N° Muestra"], errors='coerce')
+        df = df[df["is_numeric"].notna()]
+        df = df.drop(columns=["is_numeric"])
+        
+        # Ensure it's treated as string string for ID consistency
+        # (Though we filtered for numeric, we store ID as string '86761')
+        df["N° Muestra"] = df["N° Muestra"].astype(str).str.replace(r'\.0$', '', regex=True) # Remove .0 if present
         
         # Add control columns
         if "Scanned" not in df.columns:
