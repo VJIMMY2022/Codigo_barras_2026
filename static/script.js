@@ -157,7 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 panelTabs.style.display = 'flex';
                 panelTabs.classList.remove('hidden');
 
-                // AUTO-SHOW DATA TABLE
+                // Default: show Recent Scans tab, hide Data Table
+                recentScans.classList.remove('hidden');
+                dataSection.classList.add('hidden');
+
+                // Pre-load table in background (switch tab to see it)
                 loadTableData();
 
                 // Update Badge
@@ -333,8 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
         missingCountEl.textContent = stats.missing;
     }
 
-    // Export
-    exportBtn.addEventListener('click', () => { window.location.href = '/export'; });
+    // Export (also registered below at saveProgressBtn)
+    // exportBtn listener registered once at the bottom of this file
 
     // Focus Keep
     document.addEventListener('click', (e) => {
@@ -360,15 +364,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to load and render table
     async function loadTableData() {
-        // showFeedback('Actualizando tabla...', 'neutral'); 
         try {
             const response = await fetch('/get_data');
             const result = await response.json();
             renderTable(result.data);
-            dataSection.classList.remove('hidden');
+            // Do NOT force-show dataSection here - that is controlled by switchTab
         } catch (error) {
             console.error('Error loading table:', error);
-            // Don't alert aggressively to avoid spamming if polling
             const tableBody = document.getElementById('tableBody');
             if (tableBody) tableBody.innerHTML = `<tr><td colspan="6" style="color:red;">Error al cargar datos: ${error.message}</td></tr>`;
         }
