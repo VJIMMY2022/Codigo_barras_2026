@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const scanCountEl = document.getElementById('scannedCount');
     const missingCountEl = document.getElementById('missingCount');
     const totalCountEl = document.getElementById('totalCount');
-    const filenameDisplay = document.getElementById('filenameDisplay');
+
 
     // 1. File Upload
     fileInput.addEventListener('change', async (e) => {
@@ -52,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show Config Section
                 uploadSection.classList.add('hidden');
                 configSection.classList.remove('hidden');
-                filenameDisplay.textContent = result.filename;
+                const filenameDisplay = document.getElementById('filenameDisplay');
+                if (filenameDisplay) filenameDisplay.textContent = result.filename;
 
                 // Trigger auto-load of columns with default values if possible
                 loadColumnsBtn.click(); // Auto-click to show columns immediately
