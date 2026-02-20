@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import JSONResponse
 import pandas as pd
-import io
+import io, os, tempfile
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
@@ -21,14 +21,31 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Templates
 templates = Jinja2Templates(directory="templates")
 
-# In-memory storage
+# Path for shared temp file (visible to all workers on same machine/container)
+UPLOAD_TMP_PATH = os.path.join(tempfile.gettempdir(), "control_muestras_upload.xlsx")
+UPLOAD_META_PATH = os.path.join(tempfile.gettempdir(), "control_muestras_meta.txt")
+
+# In-memory storage (for processed DataFrame and stats - single-worker safe)
 data_store = {
     "df": None,
-    "raw_contents": None, # Store raw bytes to re-parse with different settings
     "filename": None,
     "config": {},
     "stats": {"total": 0, "scanned": 0, "missing": 0}
 }
+
+def get_raw_contents():
+    """Read uploaded file from shared disk path."""
+    if os.path.exists(UPLOAD_TMP_PATH):
+        with open(UPLOAD_TMP_PATH, "rb") as f:
+            return f.read()
+    return None
+
+def get_filename():
+    """Read filename from shared meta file."""
+    if os.path.exists(UPLOAD_META_PATH):
+        with open(UPLOAD_META_PATH, "r") as f:
+            return f.read().strip()
+    return None
 
 class ScanRequest(BaseModel):
     barcode: str
@@ -53,18 +70,20 @@ async def read_root(request: Request):
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     if not file.filename.endswith(('.xls', '.xlsx')):
-        raise HTTPException(status_code=400, detail="Formato inválido. Use .xls o .xlsx")
+        raise HTTPException(status_code=400, detail="Formato inv\u00e1lido. Use .xls o .xlsx")
     
     try:
         contents = await file.read()
-        data_store["raw_contents"] = contents
+        # Write to shared temp file so ALL workers can access it
+        with open(UPLOAD_TMP_PATH, "wb") as f:
+            f.write(contents)
+        with open(UPLOAD_META_PATH, "w") as f:
+            f.write(file.filename)
+        
+        # Reset dataframe in case it's a new session
+        data_store["df"] = None
         data_store["filename"] = file.filename
         
-        # Determine engine
-        engine = "openpyxl" if file.filename.endswith(".xlsx") else None
-        
-        # Initial peek to guess header (defaulting to user preference 18 if possible, or auto)
-        # We will just return success and let frontend trigger the analyze step with defaults
         return {
             "status": "success", 
             "filename": file.filename,
@@ -77,22 +96,17 @@ async def upload_file(file: UploadFile = File(...)):
 
 @app.post("/analyze_headers")
 async def analyze_headers(req: HeaderAnalysisRequest):
-    if data_store["raw_contents"] is None:
-        raise HTTPException(status_code=400, detail="No file loaded")
+    contents = get_raw_contents()
+    filename = get_filename()
+    if contents is None or filename is None:
+        raise HTTPException(status_code=400, detail="No se ha cargado el archivo. Suba el archivo primero.")
     
     try:
-        contents = data_store["raw_contents"]
-        engine = "openpyxl" if data_store["filename"].endswith(".xlsx") else None
-        
-        # Pandas uses 0-based index. User gives 1-based row number.
-        # If User says Row 18, that is index 17.
+        engine = "openpyxl" if filename.endswith(".xlsx") else None
         header_idx = req.header_row - 1
-        
         if header_idx < 0: header_idx = 0
         
-        df = pd.read_excel(io.BytesIO(contents), header=header_idx, engine=engine, nrows=5) # Read only a few rows to get columns
-        
-        # Normalize columns
+        df = pd.read_excel(io.BytesIO(contents), header=header_idx, engine=engine, nrows=5)
         columns = [str(c).replace('\n', ' ').strip() for c in df.columns]
         
         return {
@@ -105,12 +119,13 @@ async def analyze_headers(req: HeaderAnalysisRequest):
 
 @app.post("/configure")
 async def configure_app(req: ConfigurationRequest):
-    if data_store["raw_contents"] is None:
-        raise HTTPException(status_code=400, detail="No file loaded")
+    contents = get_raw_contents()
+    filename = get_filename()
+    if contents is None or filename is None:
+        raise HTTPException(status_code=400, detail="No se ha cargado el archivo. Suba el archivo primero.")
     
     try:
-        contents = data_store["raw_contents"]
-        engine = "openpyxl" if data_store["filename"].endswith(".xlsx") else None
+        engine = "openpyxl" if filename.endswith(".xlsx") else None
         
         # 1. Read with specific header
         header_idx = req.header_row - 1

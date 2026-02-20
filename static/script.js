@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 // Populate Selects
-                populateSelect(sampleColSelect, result.columns, ['muestras', 'muestra', 'sample', 'id', 'código', 'codigo']);
+                populateSelect(sampleColSelect, result.columns, ['n° muestra', 'no. muestra', 'n muestra', 'numero muestra', 'muestras', 'muestra', 'sample', 'id', 'código', 'codigo']);
                 populateSelect(qaqcColSelect, result.columns, ['qaqc', 'control', 'tipo']);
 
                 const crmSelect = document.getElementById('crmColSelect');
