@@ -20,9 +20,14 @@
                     <div class="designer-credit">Diseñado por Intelliearth - Jimmy Valderrama</div>
                 </div>
             </div>
-            <div class="user-control">
-                <span>Operador:</span>
-                <span id="headerOperatorDisplay" class="operator-badge">---</span>
+            <div class="header-right">
+                <span>Operador: <span id="headerOperatorDisplay" class="operator-badge">---</span></span>
+                <div id="headerActions" class="hidden" style="display:none;">
+                    <button id="toggleViewBtn" class="secondary-btn" title="Cambiar vista">📋 Últimos Registros</button>
+                    <button id="newScanBtn" class="secondary-btn">🔄 Nuevo Escaneo</button>
+                    <button id="exportBtn" class="primary-btn">📥 Exportar Excel</button>
+                    <button id="saveProgressBtn" class="success-btn">💾 Guardar Avance</button>
+                </div>
             </div>
         </header>
 
@@ -118,35 +123,22 @@
             <div id="scanFeedback" class="feedback-msg">Listo para escanear...</div>
         </div>
 
-        <!-- Recent Scans List -->
+        <!-- Tab Toggle for bottom panels -->
+        <div id="panelTabs" class="hidden fade-in" style="display:flex; gap:10px; margin-top:1rem;">
+            <button id="tabRecientes" class="tab-btn tab-active" onclick="switchTab('recientes')">📋 Últimos
+                Registros</button>
+            <button id="tabDatos" class="tab-btn" onclick="switchTab('datos')">📊 Registro de Muestras</button>
+        </div>
+
+        <!-- Panel: Recent Scans -->
         <div id="recentScans" class="recent-scans glass-panel hidden">
-            <h3>Últimos Registros</h3>
             <ul id="scanList">
                 <!-- Items added dynamically -->
             </ul>
         </div>
 
-        <div id="footerActions" class="hidden fade-in">
-            <div class="action-buttons">
-                <button id="viewDataBtn" class="secondary-btn">
-                    <i class="fas fa-table"></i> Ver Tabla de Datos
-                </button>
-                <button id="exportBtn" class="primary-btn">
-                    <i class="fas fa-file-export"></i> Exportar Excel
-                </button>
-            </div>
-            <button id="newScanBtn" class="danger-btn mt-2">
-                <i class="fas fa-redo"></i> Nuevo Escaneo
-            </button>
-        </div>
-
-        <!-- Data Table Modal/Section -->
-        <!-- Data Section (Persistent) -->
-        <div id="dataSection" class="glass-panel hidden fade-in" style="margin-top: 2rem;">
-            <div class="row space-between align-center" style="margin-bottom: 1rem;">
-                <h2>Registros de Muestras</h2>
-                <!-- Optional: Filter or CSV download here -->
-            </div>
+        <!-- Panel: Data Table -->
+        <div id="dataSection" class="glass-panel hidden fade-in" style="margin-top: 0;">
             <div class="table-container" style="max-height: 400px; overflow-y: auto;">
                 <table id="dataTable">
                     <thead>
@@ -158,7 +150,6 @@
                 </table>
             </div>
         </div>
-    </div>
     </div>
 
     <script src="/static/script.js"></script>

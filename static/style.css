@@ -56,6 +56,59 @@ header h1 {
     font-weight: 600;
 }
 
+/* Right side of header with action buttons */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* Tab buttons for panel switching */
+.tab-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.tab-btn.tab-active {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+/* Green save/progress button */
+.success-btn {
+    background: var(--success-color);
+    color: #0f172a;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-main);
+    transition: transform 0.2s;
+}
+
+.success-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+
 .user-control input {
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--glass-border);

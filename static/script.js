@@ -19,8 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const barcodeInput = document.getElementById('barcodeInput');
     const feedbackMsg = document.getElementById('scanFeedback');
     const scanList = document.getElementById('scanList');
-    const footerActions = document.getElementById('footerActions');
     const exportBtn = document.getElementById('exportBtn');
+    const saveProgressBtn = document.getElementById('saveProgressBtn');
+    const headerActions = document.getElementById('headerActions');
+    const panelTabs = document.getElementById('panelTabs');
 
     // Stats Elements
     const scanCountEl = document.getElementById('scannedCount');
@@ -147,7 +149,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 configSection.classList.add('hidden');
                 scanSection.classList.remove('hidden');
                 recentScans.classList.remove('hidden');
-                footerActions.classList.remove('hidden');
+
+                // Show header action buttons and panel tabs
+                headerActions.style.display = 'flex';
+                panelTabs.style.display = 'flex';
+                panelTabs.classList.remove('hidden');
 
                 // AUTO-SHOW DATA TABLE
                 loadTableData();
@@ -333,8 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!scanSection.classList.contains('hidden')
             && e.target.tagName !== 'INPUT'
             && e.target.tagName !== 'BUTTON'
-            && e.target.tagName !== 'SELECT'
-            && !document.getElementById('dataModal').contains(e.target)) { // Don't steal focus if in modal
+            && e.target.tagName !== 'SELECT') {
             barcodeInput.focus();
         }
     });
@@ -439,15 +444,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 alert(result.detail);
                 updateNextSample(result.next_sample);
-
-                // Refresh table logic (hacky: close modal, then maybe reopen? or just update stats)
-                // Let's close modal to focus on scan
-                document.getElementById('dataModal').classList.add('hidden');
+                // Refresh table to reflect the new start
+                loadTableData();
                 document.getElementById('barcodeInput').focus();
-
-                // Update stats
-                // We'd need to fetch stats again or return them.
-                // For now, next update will sync them.
             } else {
                 alert('Error: ' + result.detail);
             }
@@ -459,19 +458,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. New Scan / Reset
     const newScanBtn = document.getElementById('newScanBtn');
-
     newScanBtn.addEventListener('click', async () => {
         if (!confirm('¿Estás seguro? Se BORRARÁN todos los datos cargados y el progreso actual.')) {
             return;
         }
-
         try {
             await fetch('/reset', { method: 'POST' });
-            location.reload(); // Reload page to reset UI state completely
+            location.reload();
         } catch (error) {
             console.error(error);
             alert('Error al reiniciar');
         }
     });
+
+    // 3. Export / Save Progress
+    exportBtn.addEventListener('click', () => { window.location.href = '/export'; });
+    saveProgressBtn.addEventListener('click', () => { window.location.href = '/export'; });
+
+    // 4. Tab Switcher
+    window.switchTab = function (tabName) {
+        const dataSection = document.getElementById('dataSection');
+        const recentScansEl = document.getElementById('recentScans');
+        const tabDatos = document.getElementById('tabDatos');
+        const tabRecientes = document.getElementById('tabRecientes');
+
+        if (tabName === 'datos') {
+            dataSection.classList.remove('hidden');
+            recentScansEl.classList.add('hidden');
+            tabDatos.classList.add('tab-active');
+            tabRecientes.classList.remove('tab-active');
+            loadTableData();
+        } else {
+            recentScansEl.classList.remove('hidden');
+            dataSection.classList.add('hidden');
+            tabRecientes.classList.add('tab-active');
+            tabDatos.classList.remove('tab-active');
+        }
+    };
 
 });
