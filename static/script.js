@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Trigger auto-load of columns with default values if possible
                 loadColumnsBtn.click(); // Auto-click to show columns immediately
-                showFeedback('', 'neutral');
+                showFeedback('Archivo cargado. Complete la configuración.', 'neutral');
             } else {
                 alert('Error: ' + result.detail);
                 showFeedback('Error de carga', 'error');
@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Show header action buttons and panel tabs
                 headerActions.style.display = 'flex';
+                headerActions.classList.remove('hidden');
                 panelTabs.style.display = 'flex';
                 panelTabs.classList.remove('hidden');
 

@@ -206,7 +206,7 @@ async def configure_app(req: ConfigurationRequest):
         df["N° Envío"] = req.shipment_number
             
         data_store["df"] = df
-        data_store["config"] = req.dict()
+        data_store["config"] = req.model_dump() if hasattr(req, 'model_dump') else req.dict()
         
         # Update stats
         data_store["stats"]["total"] = len(df)
@@ -231,8 +231,9 @@ async def configure_app(req: ConfigurationRequest):
         }
         
     except Exception as e:
-        logger.error(f"Configuration error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        logger.error(f"Configuration error: {traceback.format_exc()}")
+        raise HTTPException(status_code=400, detail=f"Error de configuración: {str(e)}")
 
 @app.post("/scan")
 async def scan_sample(scan_req: ScanRequest):
