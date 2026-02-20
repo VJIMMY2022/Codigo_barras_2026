@@ -21,11 +21,42 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Templates
 templates = Jinja2Templates(directory="templates")
 
-# Path for shared temp file (visible to all workers on same machine/container)
-UPLOAD_TMP_PATH = os.path.join(tempfile.gettempdir(), "control_muestras_upload.xlsx")
-UPLOAD_META_PATH = os.path.join(tempfile.gettempdir(), "control_muestras_meta.txt")
+# Temp file storage (shared across workers on same machine)
+UPLOAD_TMP_DIR = tempfile.gettempdir()
+UPLOAD_META_PATH = os.path.join(UPLOAD_TMP_DIR, "control_muestras_meta.txt")
 
-# In-memory storage (for processed DataFrame and stats - single-worker safe)
+def _get_tmp_path(filename: str) -> str:
+    """Build the temp file path preserving original extension."""
+    ext = ".xlsx" if filename.lower().endswith(".xlsx") else ".xls"
+    return os.path.join(UPLOAD_TMP_DIR, f"control_muestras_upload{ext}")
+
+def get_raw_contents():
+    """Read uploaded file bytes from shared temp-file path."""
+    try:
+        fname = get_filename()
+        if fname is None:
+            return None
+        path = _get_tmp_path(fname)
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                return f.read()
+    except Exception as e:
+        logger.error(f"get_raw_contents error: {e}")
+    return None
+
+def get_filename():
+    """Read the original filename from the shared meta text file."""
+    try:
+        if os.path.exists(UPLOAD_META_PATH):
+            with open(UPLOAD_META_PATH, "r") as f:
+                v = f.read().strip()
+                return v if v else None
+    except Exception as e:
+        logger.error(f"get_filename error: {e}")
+    return None
+
+
+# In-memory storage (processed DataFrame & stats, single-process)
 data_store = {
     "df": None,
     "filename": None,
@@ -33,19 +64,6 @@ data_store = {
     "stats": {"total": 0, "scanned": 0, "missing": 0}
 }
 
-def get_raw_contents():
-    """Read uploaded file from shared disk path."""
-    if os.path.exists(UPLOAD_TMP_PATH):
-        with open(UPLOAD_TMP_PATH, "rb") as f:
-            return f.read()
-    return None
-
-def get_filename():
-    """Read filename from shared meta file."""
-    if os.path.exists(UPLOAD_META_PATH):
-        with open(UPLOAD_META_PATH, "r") as f:
-            return f.read().strip()
-    return None
 
 class ScanRequest(BaseModel):
     barcode: str
@@ -75,7 +93,8 @@ async def upload_file(file: UploadFile = File(...)):
     try:
         contents = await file.read()
         # Write to shared temp file so ALL workers can access it
-        with open(UPLOAD_TMP_PATH, "wb") as f:
+        tmp_path = _get_tmp_path(file.filename)
+        with open(tmp_path, "wb") as f:
             f.write(contents)
         with open(UPLOAD_META_PATH, "w") as f:
             f.write(file.filename)

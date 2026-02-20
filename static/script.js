@@ -142,14 +142,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(config)
             });
 
-            const result = await response.json();
+            const result = await response.json().catch(async () => {
+                const text = await response.text().catch(() => '');
+                throw new Error(`El servidor respondió con error ${response.status}. Detalle: ${text.substring(0, 300)}`);
+            });
 
             if (response.ok) {
                 // Transition to Scan
-                // Transition to Scan
                 configSection.classList.add('hidden');
                 scanSection.classList.remove('hidden');
-                recentScans.classList.remove('hidden');
 
                 // Show header action buttons and panel tabs
                 headerActions.style.display = 'flex';
@@ -168,20 +169,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('headerOperatorDisplay').textContent = operatorVal;
 
                 // Init Stats
-                totalCountEl.textContent = result.total;
-                missingCountEl.textContent = result.total;
+                totalCountEl.textContent = result.total || 0;
+                missingCountEl.textContent = result.total || 0;
 
                 // Init Next Sample
                 updateNextSample(result.next_sample);
 
-                showFeedback('Configurado. Envío: ' + shipmentVal, 'success');
+                showFeedback('✅ Configurado. Envío: ' + shipmentVal, 'success');
                 barcodeInput.focus();
             } else {
-                alert('Error: ' + result.detail);
+                alert('Error del servidor: ' + (result.detail || JSON.stringify(result)));
             }
         } catch (error) {
-            console.error(error);
-            alert('Error de configuración');
+            console.error('Configure error:', error);
+            alert('Error de configuración:\n' + error.message);
         }
     });
 
