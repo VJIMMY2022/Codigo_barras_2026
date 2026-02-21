@@ -54,17 +54,18 @@
                 Archivo</button>
         </div>
 
-        <!-- Step 2: Configuration (New) -->
+        <!-- Step 2: Configuration -->
         <div id="configSection" class="glass-panel hidden">
             <h2>2. Configuración de Lectura</h2>
 
-            <div class="config-grid">
+            <!-- Row 1: basic params -->
+            <div class="config-grid-4">
                 <div class="input-group">
-                    <label>Fila de Encabezados (Excel)</label>
+                    <label>Fila de Encabezados</label>
                     <input type="number" id="headerRowInput" value="18" class="premium-input">
                 </div>
                 <div class="input-group">
-                    <label>Fila Inicio de Datos (Excel)</label>
+                    <label>Fila Inicio de Datos</label>
                     <input type="number" id="dataRowInput" value="19" class="premium-input">
                 </div>
                 <div class="input-group">
@@ -77,24 +78,28 @@
                 </div>
             </div>
 
+            <!-- Row 2: column selectors + confirm (auto-shown after upload) -->
             <div id="columnSelectors" class="hidden fade-in">
-                <div class="input-group full-width">
-                    <label>Columna de Muestras (Códigos)*</label>
-                    <select id="sampleColSelect" class="premium-select"></select>
+                <div class="config-grid-4" style="align-items: flex-end;">
+                    <div class="input-group">
+                        <label>Columna de Muestras*</label>
+                        <select id="sampleColSelect" class="premium-select"></select>
+                    </div>
+                    <div class="input-group">
+                        <label>Columna QAQC</label>
+                        <select id="qaqcColSelect" class="premium-select">
+                            <option value="">-- Ninguna --</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Columna CRM/Estándar</label>
+                        <select id="crmColSelect" class="premium-select">
+                            <option value="">-- Ninguna --</option>
+                        </select>
+                    </div>
+                    <button id="confirmConfigBtn" class="primary-btn" style="height:42px; margin-top:auto;">✅
+                        Confirmar</button>
                 </div>
-                <div class="input-group full-width">
-                    <label>Columna QAQC (Tipo de Control)</label>
-                    <select id="qaqcColSelect" class="premium-select">
-                        <option value="">-- Ninguna --</option>
-                    </select>
-                </div>
-                <div class="input-group full-width">
-                    <label>Columna CRM/Estándar</label>
-                    <select id="crmColSelect" class="premium-select">
-                        <option value="">-- Ninguna --</option>
-                    </select>
-                </div>
-                <button id="confirmConfigBtn" class="primary-btn full-width">Confirmar Configuración</button>
             </div>
         </div>
 

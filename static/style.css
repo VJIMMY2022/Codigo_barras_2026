@@ -303,12 +303,26 @@ header h1 {
     margin: 20px 0;
 }
 
-/* Configuration Grid */
+/* Configuration Grid - 3 cols */
 .config-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 15px;
     margin-bottom: 20px;
+}
+
+/* Configuration Grid - 4 cols (single-row layout) */
+.config-grid-4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: end;
+}
+
+/* Tighter selects inside inline grids */
+.config-grid-4 .premium-select {
+    margin-bottom: 0;
 }
 
 .header-left {
