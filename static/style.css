@@ -70,11 +70,12 @@ header h1 {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--glass-border);
     color: var(--text-secondary);
-    padding: 8px 16px;
+    padding: 7px 14px;
     border-radius: 8px;
     cursor: pointer;
     font-family: var(--font-main);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 500;
     transition: all 0.2s;
 }
 
@@ -89,14 +90,14 @@ header h1 {
     border-color: var(--accent-color);
 }
 
-/* Green save/progress button */
+/* Green save/progress button — same size as other header buttons */
 .success-btn {
     background: var(--success-color);
     color: #0f172a;
     border: none;
-    padding: 8px 16px;
+    padding: 7px 14px;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     font-family: var(--font-main);
@@ -165,9 +166,9 @@ header h1 {
     background: var(--accent-color);
     color: white;
     border: none;
-    padding: 7px 16px;
+    padding: 7px 14px;
     border-radius: 8px;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     font-family: var(--font-main);
@@ -266,7 +267,8 @@ header h1 {
     border-radius: 8px;
     cursor: pointer;
     font-family: var(--font-main);
-    font-size: 0.88rem;
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
 .secondary-btn:hover {
@@ -448,16 +450,16 @@ h1 {
 }
 
 .next-id {
-    font-size: 4.5rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: white;
     line-height: 1.1;
 }
 
 .next-type {
-    font-size: 2rem;
+    font-size: 1.4rem;
     font-weight: 500;
-    color: var(--text-secondary);
+    color: var(--accent-color);
     margin-top: 0.2rem;
 }
 

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const configSection = document.getElementById('configSection');
     const headerRowInput = document.getElementById('headerRowInput');
     const dataRowInput = document.getElementById('dataRowInput');
-    const loadColumnsBtn = document.getElementById('loadColumnsBtn');
+    const loadColumnsBtn = document.getElementById('loadColumnsBtn') || { addEventListener: () => { }, click: () => triggerLoadColumns() };
     const columnSelectors = document.getElementById('columnSelectors');
     const sampleColSelect = document.getElementById('sampleColSelect');
     const qaqcColSelect = document.getElementById('qaqcColSelect');
@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackMsg = document.getElementById('scanFeedback');
     const scanList = document.getElementById('scanList');
     const exportBtn = document.getElementById('exportBtn');
-    const saveProgressBtn = document.getElementById('saveProgressBtn');
     const headerActions = document.getElementById('headerActions');
     const panelTabs = document.getElementById('panelTabs');
 
@@ -55,8 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const filenameDisplay = document.getElementById('filenameDisplay');
                 if (filenameDisplay) filenameDisplay.textContent = result.filename;
 
-                // Trigger auto-load of columns with default values if possible
-                loadColumnsBtn.click(); // Auto-click to show columns immediately
+                // Trigger auto-load of columns
+                triggerLoadColumns();
                 showFeedback('Archivo cargado. Complete la configuración.', 'neutral');
             } else {
                 alert('Error: ' + result.detail);
@@ -68,13 +67,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 2. Load Columns based on Header Row
-    loadColumnsBtn.addEventListener('click', async () => {
-        const headerRow = parseInt(headerRowInput.value);
-        if (isNaN(headerRow)) {
-            alert("Ingrese un número de fila válido");
-            return;
+    // Helper: fill a <select> with columns, auto-selecting by keyword or fallback index
+    function fillSelect(selectEl, columns, keywords, fallbackIndex) {
+        // Keep any existing first empty option
+        const firstOpt = selectEl.querySelector('option[value=""]');
+        selectEl.innerHTML = '';
+        if (firstOpt) selectEl.appendChild(firstOpt);
+        columns.forEach(col => {
+            const opt = document.createElement('option');
+            opt.value = col;
+            opt.textContent = col;
+            selectEl.appendChild(opt);
+        });
+        // Try to auto-select by keyword
+        const lower = columns.map(c => c.toLowerCase());
+        const match = lower.findIndex(c => keywords.some(k => c.includes(k)));
+        if (match !== -1) {
+            selectEl.value = columns[match];
+        } else if (fallbackIndex !== undefined && columns[fallbackIndex]) {
+            selectEl.value = columns[fallbackIndex];
         }
+    }
+
+    // 2. Load Columns (called automatically after upload)
+    async function triggerLoadColumns() {
+        const headerRow = parseInt(headerRowInput.value);
+        if (isNaN(headerRow)) return;
 
         try {
             const response = await fetch('/analyze_headers', {
@@ -86,14 +104,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (response.ok) {
-                // Populate Selects
-                populateSelect(sampleColSelect, result.columns, ['n° muestra', 'no. muestra', 'n muestra', 'numero muestra', 'muestras', 'muestra', 'sample', 'id', 'código', 'codigo']);
-                populateSelect(qaqcColSelect, result.columns, ['qaqc', 'control', 'tipo']);
-
+                // Sample column: keywords OR fallback to column B (index 1)
+                fillSelect(sampleColSelect, result.columns,
+                    ['n° muestra', 'no. muestra', 'n muestra', 'numero muestra', 'muestras', 'muestra', 'sample', 'codigo', 'código'],
+                    1);
+                // QAQC column
+                fillSelect(qaqcColSelect, result.columns, ['qaqc', 'control', 'tipo'], undefined);
+                // CRM column
                 const crmSelect = document.getElementById('crmColSelect');
-                // Auto-select keywords. User mentioned "default is column F" (which might be named 'CRM', 'STD', or just be the 6th col).
-                // We'll search for common names. If user wants specific index, they can select manually.
-                populateSelect(crmSelect, result.columns, ['crm', 'std', 'estandar', 'standard', 'valor']);
+                fillSelect(crmSelect, result.columns, ['crm', 'std', 'estandar', 'standard'], undefined);
 
                 // Show Selectors
                 columnSelectors.classList.remove('hidden');
@@ -104,7 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error);
             alert('Error al analizar archivo');
         }
-    });
+    }
+
+    // Keep loadColumnsBtn clickable if it exists in DOM
+    if (document.getElementById('loadColumnsBtn')) {
+        document.getElementById('loadColumnsBtn').addEventListener('click', triggerLoadColumns);
+    }
 
     // 3. Confirm Configuration
     confirmConfigBtn.addEventListener('click', async () => {
