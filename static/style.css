@@ -165,11 +165,12 @@ header h1 {
     background: var(--accent-color);
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 7px 16px;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.88rem;
+    font-weight: 600;
     cursor: pointer;
-    margin-top: 15px;
+    font-family: var(--font-main);
     transition: transform 0.2s;
 }
 
@@ -189,14 +190,15 @@ header h1 {
 
 #barcodeInput {
     width: 100%;
-    padding: 20px;
-    font-size: 1.5rem;
+    padding: 12px 16px;
+    font-size: 1.1rem;
     background: rgba(0, 0, 0, 0.3);
     border: 2px solid var(--accent-color);
-    border-radius: 12px;
+    border-radius: 10px;
     color: white;
     text-align: center;
     box-sizing: border-box;
+    letter-spacing: 0.05em;
 }
 
 #barcodeInput:focus {
@@ -260,9 +262,11 @@ header h1 {
     background: transparent;
     border: 1px solid var(--glass-border);
     color: var(--text-secondary);
-    padding: 8px 16px;
+    padding: 7px 14px;
     border-radius: 8px;
     cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 0.88rem;
 }
 
 .secondary-btn:hover {
@@ -418,22 +422,21 @@ h1 {
 }
 
 .scanner-input-wrapper {
-    flex: 2;
+    flex: 1;
     position: relative;
 }
 
 /* Next Sample Info Box */
 .next-sample-info {
-    flex: 1;
+    flex: 2;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 0 1.5rem;
+    padding: 0.8rem 1.5rem;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--glass-border);
     text-align: center;
-    /* Center text for better visibility */
 }
 
 .next-label {
@@ -445,16 +448,14 @@ h1 {
 }
 
 .next-id {
-    font-size: 3rem;
-    /* Much larger */
+    font-size: 4.5rem;
     font-weight: 700;
     color: white;
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
 .next-type {
-    font-size: 1.5rem;
-    /* Larger */
+    font-size: 2rem;
     font-weight: 500;
     color: var(--text-secondary);
     margin-top: 0.2rem;
